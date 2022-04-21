@@ -1,0 +1,17 @@
+# Reads files in format <experiment>_<reads>_1.fastq, <experiment>_<reads>_2.fast1
+# experiment name in format <publication>_<species>
+# reads name in format <condition>_<accession>
+
+experiment: John2014_Sviridis
+
+reads:
+  - M_ERR385861
+  - M_ERR385862
+  - M_ERR385863
+  - BS_ERR385864
+  - BS_ERR385865
+  - BS_ERR385866
+
+# Transcriptome name
+# transcriptome file in format {transcriptome}_transcript.fa
+transcriptome: Sviridis_500_v2.1
