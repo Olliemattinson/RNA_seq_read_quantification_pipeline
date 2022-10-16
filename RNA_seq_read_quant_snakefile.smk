@@ -2,7 +2,8 @@ configfile: 'RNA_seq_read_quant_config.yaml'
 
 rule all:
     input:
-        expand('data/quants/{experiment}_total_gene_quant.txt',experiment=config['experiment']),
+        expand('data/quants/{experiment}_total_gene_quant_tpm.txt',experiment=config['experiment']),
+        expand('data/quants/{experiment}_total_gene_quant_counts.txt',experiment=config['experiment']),    
         expand('fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html',experiment=config['experiment'],reads=config['reads'])
     wildcard_constraints:
         experiment='[^_]+_[^_]+',
@@ -10,8 +11,10 @@ rule all:
 
 rule read_quality_report:
     input:
-        reads1='data/reads/{experiment}_{reads}_1.fastq',
-        reads2='data/reads/{experiment}_{reads}_2.fastq'
+        #reads1='data/reads/{experiment}_{reads}_1.fastq',
+        #reads2='data/reads/{experiment}_{reads}_2.fastq'
+        reads1='data/reads/{experiment}_{reads}_1.fq.gz',
+        reads2='data/reads/{experiment}_{reads}_2.fq.gz'
     threads: 10
     conda:
         'envs/RNA_seq_read_quant_env.yaml'
@@ -38,8 +41,10 @@ rule index_transcriptome:
 
 rule quantify_reads:
     input:
-        reads1='data/reads/{experiment}_{reads}_1.fastq',
-        reads2='data/reads/{experiment}_{reads}_2.fastq',
+        #reads1='data/reads/{experiment}_{reads}_1.fastq',
+        #reads2='data/reads/{experiment}_{reads}_2.fastq',
+        reads1='data/reads/{experiment}_{reads}_1.fq.gz',
+        reads2='data/reads/{experiment}_{reads}_2.fq.gz',
         transcriptome_index_dir=expand('data/transcriptomes/{transcriptome}_transcriptome_index',transcriptome=config['transcriptome'])
     threads: 10
     conda:
@@ -66,22 +71,42 @@ rule merge:
     params:
         experiment_plus_reads=expand('{experiment}_{reads}',experiment=config['experiment'],reads=config['reads']),
         path_prefix='data/quants/',
-        path_suffix='_quant/quant.sf'
+        path_suffix='_quant/quant.sf',
+        output_prefix='data/quants/{experiment}_total_transcript_quant_'
     output:
-        'data/quants/{experiment}_total_transcript_quant.txt'
+        tpm='data/quants/{experiment}_total_transcript_quant_tpm.txt',
+        counts='data/quants/{experiment}_total_transcript_quant_counts.txt'
     shell:
         'python RNA_seq_read_quant_merge_quants.py {params.path_prefix} {params.path_suffix} '
-        '{output} {params.experiment_plus_reads}'
+        '{params.output_prefix} {params.experiment_plus_reads}'
 
 rule sum_transcript_to_gene:
     input:
-        'data/quants/{experiment}_total_transcript_quant.txt'
+        tpm='data/quants/{experiment}_total_transcript_quant_tpm.txt',
+        counts='data/quants/{experiment}_total_transcript_quant_counts.txt'
     conda:
         'envs/RNA_seq_read_quant_env.yaml'
     params:
         transcriptome=config['transcriptome']
     output:
-        'data/quants/{experiment}_total_gene_quant.txt'
+        tpm='data/quants/{experiment}_total_gene_quant_tpm.txt',
+        counts='data/quants/{experiment}_total_gene_quant_counts.txt'
     shell:
         'python RNA_seq_read_quant_sum_transcript_to_gene.py {params.transcriptome} '
-        '{output} {input}'
+        '{output.tpm} {input.tpm};'
+        'python RNA_seq_read_quant_sum_transcript_to_gene.py {params.transcriptome} '
+        '{output.counts} {input.counts};'
+
+"""
+rule diff_exp_analysis:
+    input:
+        pass
+    conda:
+        'envs/RNA_seq_read_env.yaml'
+    params:
+        pass
+    output:
+        pass
+    shell:
+        pass
+"""
