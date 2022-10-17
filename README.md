@@ -23,7 +23,7 @@ snakemake -s RNA_seq_read_quant_snakefile.smk --cores 10 --use-conda
   - Gene-level quantification file (counts) at: ```data/quants/<experiment>_total_gene_quant_counts.txt```
 - DESeq2
   - Likelihood ratio test across all conditions at ```data/diff_exp/<experiment>_DESeq2_LRT_results.csv```
-  - Pairwise differential expression comparisons at ```data/diff_exp/<experiment>_DESeq2_<condition1>_vs_<condition2>.csv
+  - Pairwise differential expression comparisons at ```data/diff_exp/<experiment>_DESeq2_<condition1>_vs_<condition2>.csv```
 
 
 #### Pipeline:
