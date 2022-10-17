@@ -3,7 +3,8 @@ configfile: 'RNA_seq_read_quant_config.yaml'
 rule all:
     input:
         expand('data/quants/{experiment}_total_gene_quant_tpm.txt',experiment=config['experiment']),
-        expand('data/quants/{experiment}_total_gene_quant_counts.txt',experiment=config['experiment']),    
+        expand('data/quants/{experiment}_total_gene_quant_counts.txt',experiment=config['experiment']),
+        expand('data/diff_exp/{experiment}_DESeq2_LRT_results.csv',experiment=config['experiment']),
         expand('fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html',experiment=config['experiment'],reads=config['reads'])
     wildcard_constraints:
         experiment='[^_]+_[^_]+',
@@ -97,16 +98,15 @@ rule sum_transcript_to_gene:
         'python RNA_seq_read_quant_sum_transcript_to_gene.py {params.transcriptome} '
         '{output.counts} {input.counts};'
 
-"""
 rule diff_exp_analysis:
     input:
-        pass
+        'data/quants/{experiment}_total_gene_quant_counts.txt'
     conda:
-        'envs/RNA_seq_read_env.yaml'
+        'envs/RNA_seq_read_quant_env.yaml'
     params:
-        pass
+        output_dir='data/diff_exp'
     output:
-        pass
+        'data/diff_exp/{experiment}_DESeq2_LRT_results.csv'
     shell:
-        pass
-"""
+        #'mkdir -p data/diff_exp;'
+        'Rscript RNA_seq_read_quant_DESeq2.R {input} {params.output_dir} {wildcards.experiment}'
