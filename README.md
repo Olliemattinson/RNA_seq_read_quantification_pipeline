@@ -23,7 +23,12 @@ snakemake -s RNA_seq_read_quant_snakefile.smk --cores 10 --use-conda
   - Gene-level quantification file (counts) at: ```data/quants/<experiment>_total_gene_quant_counts.txt```
 - DESeq2
   - Likelihood ratio test across all conditions at ```data/diff_exp/<experiment>_DESeq2_LRT_results.csv```
-  - Pairwise differential expression comparisons at ```data/diff_exp/<experiment>_DESeq2_<condition1>_vs_<condition2>.csv```
+  - Pairwise differential expression comparisons at ```data/diff_exp/<experiment>_DESeq2_<condition1>_vs_<condition2>_IF.csv``` and ```data/diff_exp/<experiment>_DESeq2_<condition1>_vs_<condition2>_MC.csv```
+    - IF = Using DESeq2 'Independent Filtering' method to automatically filter out low read-count genes in order to optimise the number of genes with adjusted p-values lower than significance threshold alpha after correcting for multiple comparisons.
+    - MC = Using own 'Manual Cut-off' (Independent Filtering turned off) method to choose a cut-off count level for reads to be excluded from analysis.
+    - Pairwise differential expression comparison files are the standard DESeq2 output files, but with added columns:
+      - ```diff_expression``` = condition (if either) in pairwise comparison that shows significantly higher expression level
+      - ```DE_BFC_#_comparisons``` = condition (if either) in parwise comparison that shows significantly higher expression level after correcting for multiple comparisons using Bonferroni correction. # ranges between 2 and the maximum number of pairwise comparisons between conditions in the dataset (i.e. 5 conditions = max 10 comparisons). Thus, you can choose the relevant number of comparisons, and thus the appropriate significance level, depending on how many between-condition comparisons you are interested in.
 
 
 #### Pipeline:
