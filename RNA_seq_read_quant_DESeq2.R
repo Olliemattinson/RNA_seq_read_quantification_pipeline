@@ -20,7 +20,8 @@ runs <- colnames(countsDF)
 metadataDF <- data.frame(run=runs)
 metadataDF$condition <- sapply(strsplit(metadataDF$run,'_'),'[',1)
 conditions <- unique(metadataDF$condition)
-comparisonN <- length(conditions)
+conditionN <- length(conditions)
+maxComparisonN <- (((conditionN^2)+conditionN)/2)-conditionN
 print(metadataDF)
 
 # Provide counts data and metadata file to DDSeq
@@ -44,8 +45,6 @@ summary_statistics <- function(condition1, condition2, res, filter) {
 cutoff<-2
 # Define p-value threshold (alpha)
 alpha<-0.05
-# Define p-value threshold with Bonferroni correction for number of between-condition comparisons
-alphaBF<-0.05/comparisonN
 
 # Likelihood ratio test to determine which genes show differential expression between at least 2 conditions
 ddsLRT <- DESeq(dds,test='LRT',reduced=~1)
@@ -69,18 +68,49 @@ for (i in seq(1,length(conditions)-1))
       # after multiple testing
     resPairwiseIF <- results(ddsPairwise,pAdjustMethod='BH',contrast=c('condition',condition1,condition2),alpha=alpha)
     summary_statistics(condition1, condition2, resPairwiseIF,'Independent Filtering')
+    # Add new columns to indicate direction of significant, differential expression for single up to maximum comparisons (appropriate corrected using Bonferroni)
     resPairwiseIF$diff_expression <- with(resPairwiseIF, ifelse(resPairwiseIF$log2FoldChange>0 & resPairwiseIF$padj<alpha, condition1,ifelse(resPairwiseIF$log2FoldChange<0 & resPairwiseIF$padj<alpha, condition2,'')))
-    resPairwiseIF$diff_expression_with_BF_correction <- with(resPairwiseIF, ifelse(resPairwiseIF$log2FoldChange>0 & resPairwiseIF$padj<alphaBF, condition1,ifelse(resPairwiseIF$log2FoldChange<0 & resPairwiseIF$padj<alphaBF, condition2,'')))
-    write.csv(as.data.frame(resPairwiseIF),file=sprintf('%s/%s_DESeq2_%s_results_IF.csv',outputDir,experiment,comparison))
+    if (maxComparisonN>1)
+    {
+      for (comparisonN in seq(2,maxComparisonN))
+      {
+        alphaBF<-0.05/comparisonN
+        colName<-paste('DE_BFC',comparisonN,'comparisons',sep='_')
+        resPairwiseIF[,colName] <- with(resPairwiseIF, ifelse(resPairwiseIF$log2FoldChange>0 & resPairwiseIF$padj<alphaBF, condition1,ifelse(resPairwiseIF$log2FoldChange<0 & resPairwiseIF$padj<alphaBF, condition2,'')))
+      }
+    }
+    # Clean up DF
+    resPairwiseIF <- resPairwiseIF[!is.na(resPairwiseIF$log2FoldChange),]
+    resPairwiseIF <- resPairwiseIF[!is.na(resPairwiseIF$padj),]
+    # Order DF by log2FoldChange
+    resPairwiseIF$log2FoldChange <- as.numeric(resPairwiseIF$log2FoldChange)
+    resPairwiseIFOrdered <- resPairwiseIF[order(abs(resPairwiseIF$log2FoldChange),decreasing=TRUE),]
+    # Write output file
+    write.csv(as.data.frame(resPairwiseIFOrdered),file=sprintf('%s/%s_DESeq2_%s_results_IF.csv',outputDir,experiment,comparison))
     
     # Results using Manual, predefined baseMean Cut-off (MC)
     resPairwiseMC <- results(ddsPairwise,pAdjustMethod='BH',contrast=c('condition',condition1,condition2),independentFiltering=FALSE,alpha=alpha)
     ddsPairwiseMCFiltered <- ddsPairwise[resPairwiseMC$baseMean > cutoff,]
     resPairwiseMCFiltered <- results(ddsPairwiseMCFiltered,pAdjustMethod='BH',contrast=c('condition',condition1,condition2),independentFiltering=FALSE)
     summary_statistics(condition1, condition2, resPairwiseMCFiltered,'Manual Cut-off')
+    # Add new columns to indicate direction of significant, differential expression for single up to maximum comparisons (appropriate corrected using Bonferroni)
     resPairwiseMCFiltered$diff_expression <- with(resPairwiseMCFiltered, ifelse(resPairwiseMCFiltered$log2FoldChange>0 & resPairwiseMCFiltered$padj<alpha, condition1,ifelse(resPairwiseMCFiltered$log2FoldChange<0 & resPairwiseMCFiltered$padj<alpha, condition2,'')))
-    resPairwiseMCFiltered$diff_expression_with_BF_correction <- with(resPairwiseMCFiltered, ifelse(resPairwiseMCFiltered$log2FoldChange>0 & resPairwiseMCFiltered$padj<alphaBF, condition1,ifelse(resPairwiseMCFiltered$log2FoldChange<0 & resPairwiseMCFiltered$padj<alphaBF, condition2,'')))
-    write.csv(as.data.frame(resPairwiseMCFiltered),file=sprintf('%s/%s_DESeq2_%s_results_MC.csv',outputDir,experiment,comparison))
+    if (maxComparisonN>1)
+    {
+      for (comparisonN in seq(2,maxComparisonN))
+      {
+        alphaBF<-0.05/comparisonN
+        colName<-paste('DE_BFC',comparisonN,'comparisons',sep='_')
+        resPairwiseMCFiltered[,colName] <- with(resPairwiseMCFiltered, ifelse(resPairwiseMCFiltered$log2FoldChange>0 & resPairwiseMCFiltered$padj<alphaBF, condition1,ifelse(resPairwiseMCFiltered$log2FoldChange<0 & resPairwiseMCFiltered$padj<alphaBF, condition2,'')))
+      }
+    }
+    # Clean up DF
+    resPairedMCFiltered <- resPairwiseMCFiltered[!is.na(resPairwiseMCFiltered$padj),]
+    # Order DF by log2FoldChange
+    resPairwiseMCFiltered$log2FoldChange <- as.numeric(resPairwiseMCFiltered$log2FoldChange)
+    resPairwiseMCFilteredOrdered <- resPairwiseMCFiltered[order(abs(resPairwiseMCFiltered$log2FoldChange),decreasing=TRUE),]
+    # Write output file
+    write.csv(as.data.frame(resPairwiseMCFilteredOrdered),file=sprintf('%s/%s_DESeq2_%s_results_MC.csv',outputDir,experiment,comparison))
   }
 }
 
