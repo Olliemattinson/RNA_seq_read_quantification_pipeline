@@ -8,6 +8,7 @@ Snakemake pipeline for:
 #### To run pipeline:
 - Place transcriptome file ```<transcriptome>_transcript.fa``` in ```data/transcriptomes/```
 - Place paired read files ```<experiment>_<reads>_1.fastq``` and ```<experiment>_<reads>_2.fastq``` in ```data/reads/```
+- Place tab-delimited text file ```Genes_of_interest.txt``` with 'Gene_accession' and 'Gene_name' column, containing any genes that you want a boxplot of tpm expression levels for, in ```data```
 - Activate a conda environment with snakemake installed
 - Run the following command:
 ```
@@ -21,6 +22,8 @@ snakemake -s RNA_seq_read_quant_snakefile.smk --cores 10 --use-conda
   - Transcript-level quantification file (counts) at: ```data/quants/<experiment>_total_transcript_quant_counts.txt```
   - Gene-level quantification file (tpm) at: ```data/quants/<experiment>_total_gene_quant_tpm.txt```
   - Gene-level quantification file (counts) at: ```data/quants/<experiment>_total_gene_quant_counts.txt```
+  - Tpm boxplots for genes of interest in ```data/tpm_boxplots/<experiment>```
+    - Note: currently the section of the pipeline that produces tpm boxplots will only run if the ```data/tpm_boxplots/<experiment>``` directory does not already exist
 - DESeq2
   - Likelihood ratio test across all conditions at ```data/diff_exp/<experiment>_DESeq2_LRT_results.csv```
   - Pairwise differential expression comparisons at ```data/diff_exp/<experiment>_DESeq2_<condition1>_vs_<condition2>_IF.csv``` and ```data/diff_exp/<experiment>_DESeq2_<condition1>_vs_<condition2>_MC.csv```
