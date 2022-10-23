@@ -5,7 +5,8 @@ rule all:
         expand('data/quants/{experiment}_total_gene_quant_tpm.txt',experiment=config['experiment']),
         expand('data/quants/{experiment}_total_gene_quant_counts.txt',experiment=config['experiment']),
         expand('data/diff_exp/{experiment}_DESeq2_LRT_results.csv',experiment=config['experiment']),
-        expand('fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html',experiment=config['experiment'],reads=config['reads'])
+        expand('fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html',experiment=config['experiment'],reads=config['reads']),
+        directory(expand('data/tpm_boxplots/{experiment}',experiment=config['experiment']))
     wildcard_constraints:
         experiment='[^_]+_[^_]+',
         reads='[^_]+_[^_]+'
@@ -109,3 +110,15 @@ rule diff_exp_analysis:
         'data/diff_exp/{experiment}_DESeq2_LRT_results.csv'
     shell:
         'Rscript RNA_seq_read_quant_DESeq2.R {input} {params.output_dir} {wildcards.experiment}'
+
+rule tpm_boxplots:
+    input:
+        tpm='data/quants/{experiment}_total_gene_quant_tpm.txt',
+        gene_list='data/Genes_of_interest.txt'
+    conda:
+        'envs/RNA_seq_read_quant_env.yaml'
+    output:
+        directory('data/tpm_boxplots/{experiment}')
+    shell:
+        'mkdir -p data/tpm_boxplots/{wildcards.experiment};'
+        'Rscript RNA_seq_read_quant_tpm_boxplot_generator.R {input.tpm} {input.gene_list} {output}'
