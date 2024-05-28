@@ -11,53 +11,59 @@ rule all:
         experiment='[^_]+_[^_]+',
         reads='[^_]+_[^_]+'
 
-rule read_quality_report:
+rule fastqc_primary_qc:
     input:
         #reads1='data/reads/{experiment}_{reads}_1.fastq',
         #reads2='data/reads/{experiment}_{reads}_2.fastq'
         reads1='data/reads/{experiment}_{reads}_1.fq.gz',
         reads2='data/reads/{experiment}_{reads}_2.fq.gz'
+    output:
+        'fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html'
+    params:
+        output_stem='fastqc/{experiment}_{reads}'
     threads: 10
     conda:
         'envs/RNA_seq_read_quant_env.yaml'
     wildcard_constraints:
         experiment='[^_]+_[^_]+',
         reads='[^_]+_[^_]+'
-    params:
-        output_stem='fastqc/{experiment}_{reads}'
-    output:
-        'fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html'
     shell:
         'mkdir -p {params.output_stem};'
         'fastqc {input.reads1} {input.reads2} --threads {threads} -o {params.output_stem}'
 
-rule index_transcriptome:
+rule multiqc_combined_qc:
+    input:
+        'fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html'
+    output:
+        'multiqc/{experiment}.html'     # COMPLETE RULE + ADD TO RULE ALL
+
+rule salmon_index_transcriptome:
     input:
         'data/transcriptomes/{transcriptome}_transcript.fa'
-    conda:
-        'envs/RNA_seq_read_quant_env.yaml'
     output:
         'data/transcriptomes/{transcriptome}_transcriptome_index'
+    conda:
+        'envs/RNA_seq_read_quant_env.yaml'
     shell:
         'salmon index -t {input} -i {output}'
 
-rule quantify_reads:
+rule salmon_quantify_reads:
     input:
         #reads1='data/reads/{experiment}_{reads}_1.fastq',
         #reads2='data/reads/{experiment}_{reads}_2.fastq',
         reads1='data/reads/{experiment}_{reads}_1.fq.gz',
         reads2='data/reads/{experiment}_{reads}_2.fq.gz',
         transcriptome_index_dir=expand('data/transcriptomes/{transcriptome}_transcriptome_index',transcriptome=config['transcriptome'])
+    output:
+        'data/quants/{experiment}_{reads}_quant/quant.sf'
+    params:
+        output_dir='data/quants/{experiment}_{reads}_quant'
     threads: 10
     conda:
         'envs/RNA_seq_read_quant_env.yaml'
     wildcard_constraints:
         experiment='[^_]+_[^_]+',
         reads='[^_]+_[^_]+'
-    params:
-        output_dir='data/quants/{experiment}_{reads}_quant'
-    output:
-        'data/quants/{experiment}_{reads}_quant/quant.sf'
     shell:
         'salmon quant -i {input.transcriptome_index_dir} -l A -1 {input.reads1} -2 '
         '{input.reads2} -p {threads} --validateMappings -o {params.output_dir}'
@@ -99,7 +105,7 @@ rule sum_transcript_to_gene:
         'python RNA_seq_read_quant_sum_transcript_to_gene.py {params.transcriptome} '
         '{output.counts} {input.counts};'
 
-rule diff_exp_analysis:
+rule deseq2_diff_exp_analysis:
     input:
         'data/quants/{experiment}_total_gene_quant_counts.txt'
     conda:
