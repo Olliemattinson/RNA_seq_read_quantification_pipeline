@@ -1,4 +1,8 @@
+import os
+
 configfile: 'RNA_seq_read_quant_config.yaml'
+
+ENV_DIR = "envs"
 
 rule all:
     input:
@@ -23,7 +27,7 @@ rule fastqc_primary_qc:
         output_stem='fastqc/{experiment}_{reads}'
     threads: 10
     conda:
-        'envs/RNA_seq_read_quant_env.yaml'
+        os.path.join(ENV_DIR, "fastqc_env.yaml")
     wildcard_constraints:
         experiment='[^_]+_[^_]+',
         reads='[^_]+_[^_]+'
@@ -36,6 +40,8 @@ rule multiqc_combined_qc:
         'fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html'
     output:
         'multiqc/{experiment}.html'     # COMPLETE RULE + ADD TO RULE ALL
+    conda:
+        os.path.join(ENV_DIR, "multiqc_env.yaml")
 
 rule salmon_index_transcriptome:
     input:
@@ -43,7 +49,7 @@ rule salmon_index_transcriptome:
     output:
         'data/transcriptomes/{transcriptome}_transcriptome_index'
     conda:
-        'envs/RNA_seq_read_quant_env.yaml'
+        os.path.join(ENV_DIR, "salmon_env.yaml")
     shell:
         'salmon index -t {input} -i {output}'
 
@@ -60,7 +66,7 @@ rule salmon_quantify_reads:
         output_dir='data/quants/{experiment}_{reads}_quant'
     threads: 10
     conda:
-        'envs/RNA_seq_read_quant_env.yaml'
+        os.path.join(ENV_DIR, "salmon_env.yaml")
     wildcard_constraints:
         experiment='[^_]+_[^_]+',
         reads='[^_]+_[^_]+'
@@ -109,7 +115,7 @@ rule deseq2_diff_exp_analysis:
     input:
         'data/quants/{experiment}_total_gene_quant_counts.txt'
     conda:
-        'envs/RNA_seq_read_quant_env.yaml'
+        os.path.join(ENV_DIR, "deseq2_env.yaml")
     params:
         output_dir='data/diff_exp'
     output:
