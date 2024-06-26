@@ -1,0 +1,8 @@
+name: fastq_env
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+dependencies:
+  - fastqc=0.11.8=1

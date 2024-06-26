@@ -1,0 +1,10 @@
+name: r_analysis_env
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+dependencies:
+  - r-base=4.4.1
+  - r-tidyverse=2.0.0
+  - r-ggplot2=3.5.1

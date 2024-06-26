@@ -1,0 +1,11 @@
+name: RNA_seq_read_quant_env
+
+channels:
+  - defaults
+  - bioconda
+  - conda-forge
+dependencies:
+  - black=23.3.0
+  - ruff=0.1.2
+  - snakefmt=0.8.5
+  - r-styler=1.7.0
