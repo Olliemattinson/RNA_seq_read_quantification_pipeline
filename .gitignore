@@ -1,2 +1,4 @@
 data/
 tests/__pycache__
+src/rna_seq_quant/__pycache__
+src/rna_seq_quant/functions/__pycache__
