@@ -141,9 +141,9 @@ rule sum_transcript_to_gene:
         tpm="data/quants/{experiment}_total_gene_quant_tpm.txt",
         counts="data/quants/{experiment}_total_gene_quant_counts.txt",
     shell:
-        "python RNA_seq_read_quant_sum_transcript_to_gene.py {params.transcriptome} "
+        "python sum_transcript_to_gene.py {params.transcriptome} "
         "{output.tpm} {input.tpm};"
-        "python RNA_seq_read_quant_sum_transcript_to_gene.py {params.transcriptome} "
+        "python sum_transcript_to_gene.py {params.transcriptome} "
         "{output.counts} {input.counts};"
 
 
