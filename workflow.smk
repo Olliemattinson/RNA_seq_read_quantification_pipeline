@@ -1,7 +1,7 @@
 import os
 
 
-configfile: "RNA_seq_read_quant_config.yaml"
+configfile: "data_config.yaml"
 
 
 ENV_DIR = "envs"
