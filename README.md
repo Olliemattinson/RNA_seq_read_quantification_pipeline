@@ -12,7 +12,7 @@ Snakemake pipeline for:
 - Activate a conda environment with snakemake installed
 - Run the following command:
 ```
-snakemake -s RNA_seq_read_quant_snakefile.smk --cores 10 --use-conda
+snakemake -s workflow.smk --cores 10 --use-conda
 ```
 #### Output:
 - Fastqc
