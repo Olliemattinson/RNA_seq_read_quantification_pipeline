@@ -1,4 +1,4 @@
-# Reads files in format <experiment>_<reads>_1.fastq, <experiment>_<reads>_2.fast1
+# Reads files in format <experiment>_<reads>_1.fastq, <experiment>_<reads>_2.fastq
 # experiment name in format <publication>_<species>
 # reads name in format <condition>_<accession>
 
