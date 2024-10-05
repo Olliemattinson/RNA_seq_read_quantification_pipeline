@@ -1,0 +1,19 @@
+[project]
+name = "rna_seq_quant"
+version = "0.1.0"
+description = "A tool for RNA-seq quantification and differential expression analysis."
+authors = [
+    { name="Oliver Mattinson", email="olivermattinson97@gmail.com" }
+]
+readme = "README.md"
+requires-python = ">=3.9"
+license = "MIT"
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/rna_seq_quant"]

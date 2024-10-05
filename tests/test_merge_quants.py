@@ -3,8 +3,7 @@ import os
 import tempfile
 import pandas as pd
 
-from functions.merge_quants import merge_quants_for_exp
-
+from rna_seq_quant.functions.merge_quants import merge_quants_for_exp
 
 class Test_Merge_Quants(unittest.TestCase):
     input_quant_1 = {

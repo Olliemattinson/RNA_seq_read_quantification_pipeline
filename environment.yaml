@@ -10,4 +10,8 @@ dependencies:
   - snakefmt=0.8.5
   - r-styler=1.7.0
   - pandas=1.4.2
+  - pip
   - pytest=8.2.2
+
+  - pip:
+    - .
