@@ -157,7 +157,7 @@ rule deseq2_diff_exp_analysis:
     output:
         "data/diff_exp/{experiment}_DESeq2_LRT_results.csv",
     shell:
-        "Rscript RNA_seq_read_quant_DESeq2.R {input} {params.output_dir} {wildcards.experiment}"
+        "Rscript diff_exp_analysis.R {input} {params.output_dir} {wildcards.experiment}"
 
 
 rule tpm_boxplots:
