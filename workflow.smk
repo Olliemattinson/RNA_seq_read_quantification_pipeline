@@ -170,4 +170,4 @@ rule tpm_boxplots:
         directory("data/tpm_boxplots/{experiment}"),
     shell:
         "mkdir -p data/tpm_boxplots/{wildcards.experiment};"
-        "Rscript RNA_seq_read_quant_tpm_boxplot_generator.R {input.tpm} {input.gene_list} {output}"
+        "Rscript tpm_boxplot_generator.R {input.tpm} {input.gene_list} {output}"
