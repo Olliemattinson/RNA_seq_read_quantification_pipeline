@@ -1,7 +1,5 @@
 import os
 import pandas as pd
-import sys
-import copy
 
 
 def _get_experiment_and_reads_from_file_path(file_path: str) -> tuple[str, str]:

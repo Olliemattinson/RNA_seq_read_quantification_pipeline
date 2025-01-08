@@ -5,6 +5,7 @@ import pandas as pd
 
 from rna_seq_quant.functions.merge_quants import merge_quants_for_exp
 
+
 class Test_Merge_Quants(unittest.TestCase):
     input_quant_1 = {
         "Name": ["transcript_1", "transcript_2", "transcript_3"],
@@ -56,10 +57,26 @@ class Test_Merge_Quants(unittest.TestCase):
             # Write input quants to temp csvs
             csv_list = []
             for dict, dir_name, file_name in (
-                (self.input_quant_1, "publication_species_conditionA_accession1_quant", "input_quant_1.csv"),
-                (self.input_quant_2, "publication_species_conditionA_accession2_quant", "input_quant_2.csv"),
-                (self.input_quant_3, "publication_species_conditionB_accession1_quant", "input_quant_3.csv"),
-                (self.input_quant_4, "publication_species_conditionB_accession2_quant", "input_quant_4.csv"),
+                (
+                    self.input_quant_1,
+                    "publication_species_conditionA_accession1_quant",
+                    "input_quant_1.csv",
+                ),
+                (
+                    self.input_quant_2,
+                    "publication_species_conditionA_accession2_quant",
+                    "input_quant_2.csv",
+                ),
+                (
+                    self.input_quant_3,
+                    "publication_species_conditionB_accession1_quant",
+                    "input_quant_3.csv",
+                ),
+                (
+                    self.input_quant_4,
+                    "publication_species_conditionB_accession2_quant",
+                    "input_quant_4.csv",
+                ),
             ):
                 df = pd.DataFrame(dict)
                 dir_path = os.path.join(tempdir, dir_name)
@@ -81,7 +98,13 @@ class Test_Merge_Quants(unittest.TestCase):
             expected_df_counts_merged = pd.read_csv(output_counts_file, sep="\t")
 
         # Assert output csvs are as expected
-        print(expected_df_tpm_merged.columns)
-        print(pd.DataFrame(self.expected_merged_quants_tpm).columns)
-        pd.testing.assert_frame_equal(expected_df_tpm_merged, pd.DataFrame(self.expected_merged_quants_tpm), check_like=True)
-        pd.testing.assert_frame_equal(expected_df_counts_merged, pd.DataFrame(self.expected_merged_quants_counts), check_like=True)
+        pd.testing.assert_frame_equal(
+            expected_df_tpm_merged,
+            pd.DataFrame(self.expected_merged_quants_tpm),
+            check_like=True,
+        )
+        pd.testing.assert_frame_equal(
+            expected_df_counts_merged,
+            pd.DataFrame(self.expected_merged_quants_counts),
+            check_like=True,
+        )
