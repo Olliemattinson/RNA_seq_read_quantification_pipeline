@@ -5,6 +5,19 @@ Snakemake pipeline for:
 - Quantifying RNA-seq reads against a transcriptome using Salmon, and outputting both transcript- and gene-level quantification files in both counts and tpm.
 - Carrying out differential expression analysis using DESeq2, comparing all conditions in the experiment.
 
+## Installation
+Create the `RNA_seq_read_quant_env` conda environment
+```
+conda env create -f environment.yaml
+```
+This will install all the 3rd party dependencies, as well as installing the local `rna-seq-quant` package in editable mode
+Now activate the conda environment
+```
+conda activate RNA_seq_read_quant_env
+```
+
+## Usage
+
 #### To run pipeline:
 - Place transcriptome file ```<transcriptome>_transcript.fa``` in ```data/transcriptomes/```
 - Place paired read files ```<experiment>_<reads>_1.fastq``` and ```<experiment>_<reads>_2.fastq``` in ```data/reads/```
@@ -34,6 +47,6 @@ snakemake -s workflow.smk --cores 10 --use-conda
       - ```DE_BFC_#_comparisons``` = condition (if either) in parwise comparison that shows significantly higher expression level after correcting for multiple comparisons using Bonferroni correction. # ranges between 2 and the maximum number of pairwise comparisons between conditions in the dataset (i.e. 5 conditions = max 10 comparisons). Thus, you can choose the relevant number of comparisons, and thus the appropriate significance level, depending on how many between-condition comparisons you are interested in.
 
 
-#### Pipeline:
+## Pipeline:
 
 ![plot](pipeline.svg)
