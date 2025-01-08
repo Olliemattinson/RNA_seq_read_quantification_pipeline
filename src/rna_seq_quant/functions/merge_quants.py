@@ -101,7 +101,7 @@ def merge_quants_for_exp(input_quants: list[str], output_prefix: str):
     # Write dataframes to CSV
     df_tpm_merged.to_csv(f"{output_prefix}_tpm.txt", sep="\t", mode="w", index=False)
     df_counts_merged.to_csv(
-        f"{output_prefix}_couts.txt", sep="\t", mode="w", index=False
+        f"{output_prefix}_counts.txt", sep="\t", mode="w", index=False
     )
 
 
