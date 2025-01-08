@@ -11,44 +11,44 @@ class Test_Merge_Quants(unittest.TestCase):
         "Length": [100, 100, 100],
         "EffectiveLength": [100, 100, 100],
         "NumReads": [50, 100, 200],
-        "TPM": [10, 20, 40],
+        "TPM": [10.0, 20.0, 40.0],
     }
     input_quant_2 = {
         "Name": ["transcript_2", "transcript_3"],
         "Length": [100, 100],
         "EffectiveLength": [100, 100],
         "NumReads": [200, 200],
-        "TPM": [40, 40],
+        "TPM": [40.0, 40.0],
     }
     input_quant_3 = {
         "Name": ["transcript_1", "transcript_2", "transcript_3"],
         "Length": [100, 100, 100],
         "EffectiveLength": [100, 100, 100],
         "NumReads": [200, 100, 50],
-        "TPM": [40, 20, 10],
+        "TPM": [40.0, 20.0, 10.0],
     }
     input_quant_4 = {
         "Name": ["transcript_1", "transcript_2"],
         "Length": [100, 100],
         "EffectiveLength": [100, 100],
         "NumReads": [200, 100],
-        "TPM": [40, 40],
+        "TPM": [40.0, 40.0],
     }
     expected_merged_quants_tpm = {
         "Transcript_name": ["transcript_1", "transcript_2", "transcript_3"],
-        "conditionA_accession1_transcript_TPM": [10, 20, 40],
-        "conditionA_accession2_transcript_TPM": [0, 40, 40],
-        "conditionB_accession1_transcript_TPM": [40, 20, 10],
-        "conditionB_accession2_transcript_TPM": [40, 40, 0],
-        "conditionA_mean_transcript_TPM": [5, 30, 40],
-        "conditionB_mean_transcript_TPM": [40, 30, 5],
+        "conditionA_accession1_transcript_TPM": [10.0, 20.0, 40.0],
+        "conditionA_accession2_transcript_TPM": [0.0, 40.0, 40.0],
+        "conditionB_accession1_transcript_TPM": [40.0, 20.0, 10.0],
+        "conditionB_accession2_transcript_TPM": [40.0, 40.0, 0.0],
+        "conditionA_mean_transcript_TPM": [5.0, 30.0, 40.0],
+        "conditionB_mean_transcript_TPM": [40.0, 30.0, 5.0],
     }
     expected_merged_quants_counts = {
         "Transcript_name": ["transcript_1", "transcript_2", "transcript_3"],
         "conditionA_accession1_transcript_counts": [50, 100, 200],
         "conditionA_accession2_transcript_counts": [0, 200, 200],
         "conditionB_accession1_transcript_counts": [200, 100, 50],
-        "conditionB_accession2_transcript_counts": [200, 100],
+        "conditionB_accession2_transcript_counts": [200, 100, 0],
     }
 
     def test_merge_quants_for_exp(self):
@@ -65,7 +65,7 @@ class Test_Merge_Quants(unittest.TestCase):
                 dir_path = os.path.join(tempdir, dir_name)
                 os.makedirs(dir_path, exist_ok=True)
                 file_path = os.path.join(dir_path, file_name)
-                df.to_csv(file_path)
+                df.to_csv(file_path, index=False)
                 csv_list.append(file_path)
 
             # Get output file paths
@@ -81,5 +81,7 @@ class Test_Merge_Quants(unittest.TestCase):
             expected_df_counts_merged = pd.read_csv(output_counts_file, sep="\t")
 
         # Assert output csvs are as expected
-        self.assertEqual(expected_df_tpm_merged, self.expected_merged_quants_tpm)
-        self.assertEqual(expected_df_counts_merged, self.expected_merged_quants_counts)
+        print(expected_df_tpm_merged.columns)
+        print(pd.DataFrame(self.expected_merged_quants_tpm).columns)
+        pd.testing.assert_frame_equal(expected_df_tpm_merged, pd.DataFrame(self.expected_merged_quants_tpm), check_like=True)
+        pd.testing.assert_frame_equal(expected_df_counts_merged, pd.DataFrame(self.expected_merged_quants_counts), check_like=True)

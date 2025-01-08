@@ -76,18 +76,22 @@ def merge_quants_for_exp(input_quants: list[str], output_prefix: str):
         df_tpm_merged = pd.merge(
             df_tpm_merged, df_tpm, on="Transcript_name", how="outer"
         )
+        df_tpm_merged.fillna(0.0, inplace=True)
 
         # Create counts dataframe. Drop and rename columns. Merge.
         df_counts = df.drop(["Length", "EffectiveLength", "TPM"], axis=1)
+        count_col_name = f"{reads}_transcript_counts"
         df_counts = df_counts.rename(
             columns={
                 "Name": "Transcript_name",
-                "NumReads": f"{reads}_transcript_counts",
+                "NumReads": count_col_name,
             }
         )
         df_counts_merged = pd.merge(
             df_counts_merged, df_counts, on="Transcript_name", how="outer"
         )
+        df_counts_merged.fillna(0, inplace=True)
+        df_counts_merged[count_col_name] = df_counts_merged[count_col_name].astype(int)
 
     # For TPM dataframe, create mean column per condition
     for condition in conditions:
