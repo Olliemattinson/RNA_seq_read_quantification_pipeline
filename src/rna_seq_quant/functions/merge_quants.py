@@ -78,7 +78,7 @@ def merge_quants_for_exp(input_quants: list[str], output_prefix: str):
         )
 
         # Create counts dataframe. Drop and rename columns. Merge.
-        df_counts = df.drop(["Length", "EffectiveLength", "TPM"])
+        df_counts = df.drop(["Length", "EffectiveLength", "TPM"], axis=1)
         df_counts = df_counts.rename(
             columns={
                 "Name": "Transcript_name",

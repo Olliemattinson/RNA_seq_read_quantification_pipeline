@@ -9,28 +9,28 @@ class Test_Merge_Quants(unittest.TestCase):
     input_quant_1 = {
         "Name": ["transcript_1", "transcript_2", "transcript_3"],
         "Length": [100, 100, 100],
-        "Effective_Length": [100, 100, 100],
+        "EffectiveLength": [100, 100, 100],
         "NumReads": [50, 100, 200],
         "TPM": [10, 20, 40],
     }
     input_quant_2 = {
         "Name": ["transcript_2", "transcript_3"],
         "Length": [100, 100],
-        "Effective_Length": [100, 100],
+        "EffectiveLength": [100, 100],
         "NumReads": [200, 200],
         "TPM": [40, 40],
     }
     input_quant_3 = {
         "Name": ["transcript_1", "transcript_2", "transcript_3"],
         "Length": [100, 100, 100],
-        "Effective_Length": [100, 100, 100],
+        "EffectiveLength": [100, 100, 100],
         "NumReads": [200, 100, 50],
         "TPM": [40, 20, 10],
     }
     input_quant_4 = {
         "Name": ["transcript_1", "transcript_2"],
         "Length": [100, 100],
-        "Effective_Length": [100, 100],
+        "EffectiveLength": [100, 100],
         "NumReads": [200, 100],
         "TPM": [40, 40],
     }
