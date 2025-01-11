@@ -6,6 +6,7 @@ import pandas as pd
 
 from rna_seq_quant.functions.sum_transcript_to_gene import sum_transcript_to_gene
 
+
 class Test_Sum_Transcript_To_Gene(unittest.TestCase):
     input_counts_df = pd.DataFrame(
         {
@@ -24,7 +25,12 @@ class Test_Sum_Transcript_To_Gene(unittest.TestCase):
     annotation_info_df = pd.DataFrame(
         {
             "locusName": ["gene_1", "gene_1", "gene_2", "gene_3"],
-            "transcriptName": ["transcript_1.1", "transcript_1.2", "transcript_2.1", "transcript_3.1"]
+            "transcriptName": [
+                "transcript_1.1",
+                "transcript_1.2",
+                "transcript_2.1",
+                "transcript_3.1",
+            ],
         }
     )
     expected_output_counts_df = pd.DataFrame(
@@ -48,11 +54,14 @@ class Test_Sum_Transcript_To_Gene(unittest.TestCase):
                 input_counts_csv = os.path.join(tempdir, f"input_{unit}.csv")
                 self.input_counts_df.to_csv(input_counts_csv, sep="\t", index=False)
                 annotation_info_csv = os.path.join(tempdir, "annotation_info.csv")
-                self.annotation_info_df.to_csv(annotation_info_csv, sep="\t", index=False)
+                self.annotation_info_df.to_csv(
+                    annotation_info_csv, sep="\t", index=False
+                )
                 output_counts_csv = os.path.join(tempdir, f"output_{unit}.csv")
-                sum_transcript_to_gene(input_counts_csv, output_counts_csv, annotation_info_csv)
+                sum_transcript_to_gene(
+                    input_counts_csv, output_counts_csv, annotation_info_csv
+                )
                 pd.testing.assert_frame_equal(
                     self.expected_output_counts_df,
                     pd.read_csv(output_counts_csv, sep="\t"),
                 )
-            
