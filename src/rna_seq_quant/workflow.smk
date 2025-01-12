@@ -138,7 +138,7 @@ rule sum_transcript_to_gene:
     input:
         tpm="data/quants/{experiment}_total_transcript_quant_tpm.txt",
         counts="data/quants/{experiment}_total_transcript_quant_counts.txt",
-        annotation_info=f"data/annotation_info/{{_GENOME}}_annotation_info.txt",
+        annotation_info=f"data/annotation_info/{{_GENOME}}_annotation_info.tsv",
     output:
         tpm="data/quants/{experiment}_total_gene_quant_tpm.txt",
         counts="data/quants/{experiment}_total_gene_quant_counts.txt",
