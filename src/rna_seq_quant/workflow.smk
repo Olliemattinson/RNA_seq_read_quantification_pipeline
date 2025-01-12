@@ -10,6 +10,10 @@ ENV_DIR = "envs"
 
 _GENOME = config["genome"]
 
+reads_prefix = "data/reads/{experiment}_{reads}"
+reads1 = f"{reads_prefix}_1.fastq.gz"
+reads2 = f"{reads_prefix}_2.fastq.gz"
+
 rule all:
     input:
         expand(
@@ -38,8 +42,8 @@ rule all:
 
 rule fastqc_primary_qc:
     input:
-        reads1="data/reads/{experiment}_{reads}_1.fastq.gz",
-        reads2="data/reads/{experiment}_{reads}_2.fastq.gz",
+        reads1=reads1,
+        reads2=reads2,
     output:
         "fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html",
     params:
@@ -47,9 +51,6 @@ rule fastqc_primary_qc:
     threads: 10
     conda:
         os.path.join(ENV_DIR, "fastqc_env.yaml")
-    wildcard_constraints:
-        experiment="[^_]+_[^_]+",
-        reads="[^_]+_[^_]+",
     shell:
         "mkdir -p {params.output_stem};"
         "fastqc {input.reads1} {input.reads2} --threads {threads} -o {params.output_stem}"
@@ -86,8 +87,8 @@ rule salmon_index_transcriptome:
 
 rule salmon_quantify_reads:
     input:
-        reads1="data/reads/{experiment}_{reads}_1.fastq.gz",
-        reads2="data/reads/{experiment}_{reads}_2.fastq.gz",
+        reads1=reads1,
+        reads2=reads2,
         transcriptome_index_dir=f"data/transcriptomes/{_GENOME}_transcriptome_index",
     output:
         "data/quants/{experiment}_{reads}_quant/quant.sf",
@@ -96,9 +97,6 @@ rule salmon_quantify_reads:
     threads: 10
     conda:
         os.path.join(ENV_DIR, "salmon_env.yaml")
-    wildcard_constraints:
-        experiment="[^_]+_[^_]+",
-        reads="[^_]+_[^_]+",
     shell:
         "salmon quant -i {input.transcriptome_index_dir} -l A -1 {input.reads1} -2 "
         "{input.reads2} -p {threads} --validateMappings -o {params.output_dir}"
@@ -111,9 +109,6 @@ rule merge:
             experiment=config["experiment"],
             reads=config["reads"],
         ),
-    wildcard_constraints:
-        experiment="[^_]+_[^_]+",
-        reads="[^_]+_[^_]+",
     params:
         output_prefix="data/quants/{experiment}_total_transcript_quant_",
     output:
