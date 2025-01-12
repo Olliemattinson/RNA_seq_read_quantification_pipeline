@@ -28,11 +28,6 @@ rule all:
             "data/diff_exp/{experiment}_DESeq2_LRT_results.csv",
             experiment=config["experiment"],
         ),
-        expand(
-            "fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html",
-            experiment=config["experiment"],
-            reads=config["reads"],
-        ),
         expand("data/tpm_boxplots/{experiment}", experiment=config["experiment"]),
         expand("multiqc/{experiment}.html", experiment=config["experiment"]),
     wildcard_constraints:
@@ -45,7 +40,7 @@ rule fastqc_primary_qc:
         reads1=reads1,
         reads2=reads2,
     output:
-        "fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html",
+        "fastqc/{experiment}_{reads}/{experiment}_{reads}_fastqc.html",
     params:
         output_stem="fastqc/{experiment}_{reads}",
     threads: 10
@@ -59,7 +54,7 @@ rule fastqc_primary_qc:
 rule multiqc_combined_qc:
     input:
         expand(
-            "fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html",
+            rules.fastqc_primary_qc.output,
             experiment=config["experiment"],
             reads=config["reads"],
         )
