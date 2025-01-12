@@ -76,9 +76,9 @@ rule multiqc_combined_qc:
 
 rule salmon_index_transcriptome:
     input:
-        "data/transcriptomes/{transcriptome}_transcript.fa",
+        f"data/transcriptomes/{_GENOME}_transcript.fa",
     output:
-        "data/transcriptomes/{transcriptome}_transcriptome_index",
+        directory(f"data/transcriptomes/{_GENOME}_transcriptome_index"),
     conda:
         os.path.join(ENV_DIR, "salmon_env.yaml")
     shell:
