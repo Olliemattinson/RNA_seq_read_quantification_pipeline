@@ -1,6 +1,7 @@
 import os
 
 from rna_seq_quant.functions.sum_transcript_to_gene import sum_transcript_to_gene
+from rna_seq_quant.functions.merge_quants import merge_quants_for_exp
 
 configfile: "data_config.yaml"
 
@@ -110,26 +111,20 @@ rule merge:
             experiment=config["experiment"],
             reads=config["reads"],
         ),
-    conda:
-        "envs/RNA_seq_read_quant_env.yaml"
     wildcard_constraints:
         experiment="[^_]+_[^_]+",
         reads="[^_]+_[^_]+",
     params:
-        experiment_plus_reads=expand(
-            "{experiment}_{reads}",
-            experiment=config["experiment"],
-            reads=config["reads"],
-        ),
-        path_prefix="data/quants/",
-        path_suffix="_quant/quant.sf",
         output_prefix="data/quants/{experiment}_total_transcript_quant_",
     output:
         tpm="data/quants/{experiment}_total_transcript_quant_tpm.txt",
         counts="data/quants/{experiment}_total_transcript_quant_counts.txt",
-    shell:
-        "python RNA_seq_read_quant_merge_quants.py {params.path_prefix} {params.path_suffix} "
-        "{params.output_prefix} {params.experiment_plus_reads}"
+    run:
+        merge_quants(
+            input,
+            params.output_prefix,
+        )
+
 
 
 rule sum_transcript_to_gene:
