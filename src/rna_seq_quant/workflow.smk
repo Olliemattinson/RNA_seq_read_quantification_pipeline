@@ -1,11 +1,13 @@
 import os
 
+from rna_seq_quant.functions.sum_transcript_to_gene import sum_transcript_to_gene
 
 configfile: "data_config.yaml"
 
 
 ENV_DIR = "envs"
 
+_GENOME = config["genome"]
 
 rule all:
     input:
@@ -26,9 +28,8 @@ rule all:
             experiment=config["experiment"],
             reads=config["reads"],
         ),
-        directory(
-            expand("data/tpm_boxplots/{experiment}", experiment=config["experiment"])
-        ),
+        expand("data/tpm_boxplots/{experiment}", experiment=config["experiment"]),
+        expand("multiqc/{experiment}.html", experiment=config["experiment"]),
     wildcard_constraints:
         experiment="[^_]+_[^_]+",
         reads="[^_]+_[^_]+",
@@ -36,10 +37,8 @@ rule all:
 
 rule fastqc_primary_qc:
     input:
-        #reads1='data/reads/{experiment}_{reads}_1.fastq',
-        #reads2='data/reads/{experiment}_{reads}_2.fastq'
-        reads1="data/reads/{experiment}_{reads}_1.fq.gz",
-        reads2="data/reads/{experiment}_{reads}_2.fq.gz",
+        reads1="data/reads/{experiment}_{reads}_1.fastq.gz",
+        reads2="data/reads/{experiment}_{reads}_2.fastq.gz",
     output:
         "fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html",
     params:
@@ -57,11 +56,20 @@ rule fastqc_primary_qc:
 
 rule multiqc_combined_qc:
     input:
-        "fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html",
+        expand(
+            "fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html",
+            experiment=config["experiment"],
+            reads=config["reads"],
+        )
     output:
-        "multiqc/{experiment}.html",  # COMPLETE RULE + ADD TO RULE ALL
+        "multiqc/{experiment}.html",
+    params:
+        input_pattern="fastqc/*",
+        output_dir="multiqc",
     conda:
         os.path.join(ENV_DIR, "multiqc_env.yaml")
+    shell:
+        "multiqc {params.input_pattern} -o {params.output_dir}"
 
 
 rule salmon_index_transcriptome:
@@ -77,14 +85,9 @@ rule salmon_index_transcriptome:
 
 rule salmon_quantify_reads:
     input:
-        #reads1='data/reads/{experiment}_{reads}_1.fastq',
-        #reads2='data/reads/{experiment}_{reads}_2.fastq',
-        reads1="data/reads/{experiment}_{reads}_1.fq.gz",
-        reads2="data/reads/{experiment}_{reads}_2.fq.gz",
-        transcriptome_index_dir=expand(
-            "data/transcriptomes/{transcriptome}_transcriptome_index",
-            transcriptome=config["transcriptome"],
-        ),
+        reads1="data/reads/{experiment}_{reads}_1.fastq.gz",
+        reads2="data/reads/{experiment}_{reads}_2.fastq.gz",
+        transcriptome_index_dir=f"data/transcriptomes/{_GENOME}_transcriptome_index",
     output:
         "data/quants/{experiment}_{reads}_quant/quant.sf",
     params:
@@ -133,18 +136,21 @@ rule sum_transcript_to_gene:
     input:
         tpm="data/quants/{experiment}_total_transcript_quant_tpm.txt",
         counts="data/quants/{experiment}_total_transcript_quant_counts.txt",
-    conda:
-        "envs/RNA_seq_read_quant_env.yaml"
-    params:
-        transcriptome=config["transcriptome"],
+        annotation_info=f"data/annotation_info/{_GENOME}_annotation_info.tsv",
     output:
         tpm="data/quants/{experiment}_total_gene_quant_tpm.txt",
         counts="data/quants/{experiment}_total_gene_quant_counts.txt",
-    shell:
-        "python sum_transcript_to_gene.py {params.transcriptome} "
-        "{output.tpm} {input.tpm};"
-        "python sum_transcript_to_gene.py {params.transcriptome} "
-        "{output.counts} {input.counts};"
+    run:
+        sum_transcript_to_gene(
+            input.counts,
+            input.annotation_info,
+            output.counts,
+        )
+        sum_transcript_to_gene(
+            input.tpm,
+            input.annotation_info,
+            output.tpm,
+        )
 
 
 rule deseq2_diff_exp_analysis:

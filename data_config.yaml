@@ -12,6 +12,7 @@ reads:
   - BS_ERR385865
   - BS_ERR385866
 
-# Transcriptome name
-# transcriptome file in format {transcriptome}_transcript.fa
-transcriptome: Sviridis_500_v2.1
+# Genome name
+genome: Sviridis_500_v2.1
+# transcriptome file in format {genome}_transcript.fa
+# annotation info file in format {genome}_annotation_info.tsv
