@@ -31,6 +31,7 @@ rule all:
         directory(
             expand("data/tpm_boxplots/{experiment}", experiment=config["experiment"])
         ),
+        expand("multiqc/{experiment}.html", experiment=config["experiment"])
     wildcard_constraints:
         experiment="[^_]+_[^_]+",
         reads="[^_]+_[^_]+",
@@ -61,9 +62,14 @@ rule multiqc_combined_qc:
     input:
         "fastqc/{experiment}_{reads}/{experiment}_{reads}_2_fastqc.html",
     output:
-        "multiqc/{experiment}.html",  # COMPLETE RULE + ADD TO RULE ALL
+        "multiqc/{experiment}.html",
+    params:
+        input_pattern="fastqc/*",
+        output_dir="multiqc",
     conda:
         os.path.join(ENV_DIR, "multiqc_env.yaml")
+    shell:
+        "multiqc {params.input_pattern} -o {params.output_dir}"
 
 
 rule salmon_index_transcriptome:
@@ -83,7 +89,7 @@ rule salmon_quantify_reads:
         #reads2='data/reads/{experiment}_{reads}_2.fastq',
         reads1="data/reads/{experiment}_{reads}_1.fq.gz",
         reads2="data/reads/{experiment}_{reads}_2.fq.gz",
-        transcriptome_index_dir=f"data/transcriptomes/{{_GENOME}}_transcriptome_index"),
+        transcriptome_index_dir=f"data/transcriptomes/{{_GENOME}}_transcriptome_index",
     output:
         "data/quants/{experiment}_{reads}_quant/quant.sf",
     params:
@@ -133,8 +139,6 @@ rule sum_transcript_to_gene:
         tpm="data/quants/{experiment}_total_transcript_quant_tpm.txt",
         counts="data/quants/{experiment}_total_transcript_quant_counts.txt",
         annotation_info=f"data/annotation_info/{{_GENOME}}_annotation_info.txt",
-    conda:
-        "envs/RNA_seq_read_quant_env.yaml"
     output:
         tpm="data/quants/{experiment}_total_gene_quant_tpm.txt",
         counts="data/quants/{experiment}_total_gene_quant_counts.txt",
