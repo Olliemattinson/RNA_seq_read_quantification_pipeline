@@ -84,7 +84,7 @@ rule salmon_quantify_reads:
     input:
         reads1=reads1,
         reads2=reads2,
-        transcriptome_index_dir=f"data/transcriptomes/{_GENOME}_transcriptome_index",
+        transcriptome_index_dir=rules.salmon_index_transcriptome.output,
     output:
         "data/quants/{experiment}_{reads}_quant/quant.sf",
     params:
@@ -100,15 +100,15 @@ rule salmon_quantify_reads:
 rule merge:
     input:
         expand(
-            "data/quants/{experiment}_{reads}_quant/quant.sf",
+            rules.salmon_quantify_reads.output,
             experiment=config["experiment"],
             reads=config["reads"],
         ),
-    params:
-        output_prefix="data/quants/{experiment}_total_transcript_quant_",
     output:
         tpm="data/quants/{experiment}_total_transcript_quant_tpm.txt",
         counts="data/quants/{experiment}_total_transcript_quant_counts.txt",
+    params:
+        output_prefix="data/quants/{experiment}_total_transcript_quant_",
     run:
         merge_quants(
             input,
@@ -119,8 +119,8 @@ rule merge:
 
 rule sum_transcript_to_gene:
     input:
-        tpm="data/quants/{experiment}_total_transcript_quant_tpm.txt",
-        counts="data/quants/{experiment}_total_transcript_quant_counts.txt",
+        tpm=rules.merge.output.tpm,
+        counts=rules.merge.output.counts,
         annotation_info=f"data/annotation_info/{_GENOME}_annotation_info.tsv",
     output:
         tpm="data/quants/{experiment}_total_gene_quant_tpm.txt",
@@ -140,25 +140,25 @@ rule sum_transcript_to_gene:
 
 rule deseq2_diff_exp_analysis:
     input:
-        "data/quants/{experiment}_total_gene_quant_counts.txt",
+        rules.sum_transcript_to_gene.output.counts,
+    output:
+        "data/diff_exp/{experiment}_DESeq2_LRT_results.csv",
     conda:
         os.path.join(ENV_DIR, "deseq2_env.yaml")
     params:
         output_dir="data/diff_exp",
-    output:
-        "data/diff_exp/{experiment}_DESeq2_LRT_results.csv",
     shell:
         "Rscript diff_exp_analysis.R {input} {params.output_dir} {wildcards.experiment}"
 
 
 rule tpm_boxplots:
     input:
-        tpm="data/quants/{experiment}_total_gene_quant_tpm.txt",
+        tpm=rules.sum_transcript_to_gene.output.tpm,
         gene_list="data/Genes_of_interest.txt",
-    conda:
-        "envs/RNA_seq_read_quant_env.yaml"
     output:
         directory("data/tpm_boxplots/{experiment}"),
+    conda:
+        "envs/RNA_seq_read_quant_env.yaml"
     shell:
         "mkdir -p data/tpm_boxplots/{wildcards.experiment};"
         "Rscript tpm_boxplot_generator.R {input.tpm} {input.gene_list} {output}"
