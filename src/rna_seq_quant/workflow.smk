@@ -3,6 +3,7 @@ import os
 from rna_seq_quant.functions.sum_transcript_to_gene import sum_transcript_to_gene
 from rna_seq_quant.functions.merge_quants import merge_quants_for_exp
 
+
 configfile: "data_config.yaml"
 
 
@@ -16,6 +17,7 @@ reads2 = f"{reads_prefix}_2.fastq.gz"
 multiqc_file = "multiqc/{experiment}.html"
 deseq_results = "data/diff_exp/{experiment}_DESeq2_LRT_results.csv"
 tpm_boxplots_dir = "data/tpm_boxplots/{experiment}"
+
 
 rule all:
     input:
@@ -49,7 +51,7 @@ rule multiqc_combined_qc:
             rules.fastqc_primary_qc.output,
             experiment=config["experiment"],
             reads=config["reads"],
-        )
+        ),
     output:
         multiqc_file,
     params:
@@ -106,7 +108,6 @@ rule merge:
             input,
             params.output_prefix,
         )
-
 
 
 rule sum_transcript_to_gene:
