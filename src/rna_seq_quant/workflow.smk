@@ -13,23 +13,15 @@ _GENOME = config["genome"]
 reads_prefix = "data/reads/{experiment}_{reads}"
 reads1 = f"{reads_prefix}_1.fastq.gz"
 reads2 = f"{reads_prefix}_2.fastq.gz"
+multiqc_file = "multiqc/{experiment}.html"
+deseq_results = "data/diff_exp/{experiment}_DESeq2_LRT_results.csv"
+tpm_boxplots_dir = "data/tpm_boxplots/{experiment}"
 
 rule all:
     input:
-        expand(
-            "data/quants/{experiment}_total_gene_quant_tpm.txt",
-            experiment=config["experiment"],
-        ),
-        expand(
-            "data/quants/{experiment}_total_gene_quant_counts.txt",
-            experiment=config["experiment"],
-        ),
-        expand(
-            "data/diff_exp/{experiment}_DESeq2_LRT_results.csv",
-            experiment=config["experiment"],
-        ),
-        expand("data/tpm_boxplots/{experiment}", experiment=config["experiment"]),
-        expand("multiqc/{experiment}.html", experiment=config["experiment"]),
+        expand(multiqc_file, experiment=config["experiment"]),
+        expand(deseq_results, experiment=config["experiment"]),
+        expand(tpm_boxplots_dir, experiment=config["experiment"]),
     wildcard_constraints:
         experiment="[^_]+_[^_]+",
         reads="[^_]+_[^_]+",
@@ -59,7 +51,7 @@ rule multiqc_combined_qc:
             reads=config["reads"],
         )
     output:
-        "multiqc/{experiment}.html",
+        multiqc_file,
     params:
         input_pattern="fastqc/*",
         output_dir="multiqc",
@@ -142,7 +134,7 @@ rule deseq2_diff_exp_analysis:
     input:
         rules.sum_transcript_to_gene.output.counts,
     output:
-        "data/diff_exp/{experiment}_DESeq2_LRT_results.csv",
+        deseq_results,
     conda:
         os.path.join(ENV_DIR, "deseq2_env.yaml")
     params:
@@ -156,7 +148,7 @@ rule tpm_boxplots:
         tpm=rules.sum_transcript_to_gene.output.tpm,
         gene_list="data/Genes_of_interest.txt",
     output:
-        directory("data/tpm_boxplots/{experiment}"),
+        directory(tpm_boxplots_dir),
     conda:
         "envs/RNA_seq_read_quant_env.yaml"
     shell:
