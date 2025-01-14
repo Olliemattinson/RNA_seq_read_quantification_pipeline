@@ -11,7 +11,7 @@ ENV_DIR = "envs"
 
 _GENOME = config["genome"]
 
-reads_ext="fastq.gz"
+reads_ext = "fastq.gz"
 reads_prefix = "data/reads/{experiment}_{reads}"
 reads1 = f"{reads_prefix}_1.{reads_ext}"
 reads2 = f"{reads_prefix}_2.{reads_ext}"
