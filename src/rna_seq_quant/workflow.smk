@@ -11,9 +11,10 @@ ENV_DIR = "envs"
 
 _GENOME = config["genome"]
 
+reads_ext="fastq.gz"
 reads_prefix = "data/reads/{experiment}_{reads}"
-reads1 = f"{reads_prefix}_1.fastq.gz"
-reads2 = f"{reads_prefix}_2.fastq.gz"
+reads1 = f"{reads_prefix}_1.{reads_ext}"
+reads2 = f"{reads_prefix}_2.{reads_ext}"
 multiqc_file = "multiqc/{experiment}.html"
 deseq_results = "data/diff_exp/{experiment}_DESeq2_LRT_results.csv"
 tpm_boxplots_dir = "data/tpm_boxplots/{experiment}"
